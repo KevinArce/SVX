@@ -1,0 +1,34 @@
+---
+/** Small Bauhaus metadata chip. `tone` picks a contrast-checked colour pairing. */
+interface Props {
+  tone?: 'neutral' | 'primary' | 'gold' | 'warn';
+  shape?: 'square' | 'rounded';
+  class?: string;
+}
+
+const { tone = 'neutral', shape = 'square', class: className } = Astro.props;
+
+const TONES: Record<NonNullable<Props['tone']>, string> = {
+  neutral: 'bg-surface text-text border-border',
+  primary: 'bg-bauhaus-red text-pure-white border-border',
+  // Yellow is an accent fill token: text on yellow MUST be Stark Black (11.5:1 ratio)
+  gold: 'bg-bauhaus-yellow text-stark-black border-border',
+  warn: 'bg-card text-danger-text border-danger-text',
+};
+
+const SHAPES: Record<NonNullable<Props['shape']>, string> = {
+  square: 'rounded-none',
+  rounded: 'rounded-full',
+};
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 border-2 px-2.5 py-1 text-xs font-black uppercase tracking-wider whitespace-nowrap shadow-[2px_2px_0px_0px_var(--color-border)]',
+    TONES[tone],
+    SHAPES[shape],
+    className,
+  ]}
+>
+  <slot />
+</span>

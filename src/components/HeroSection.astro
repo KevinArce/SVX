@@ -1,0 +1,125 @@
+---
+interface Props {
+  eyebrow?: string | undefined;
+  eyebrowI18nKey?: string | undefined;
+  title: string;
+  titleI18nKey?: string | undefined;
+  description: string;
+  descriptionI18nKey?: string | undefined;
+  /** Rendered as the primary call to action when both fields are present. */
+  ctaHref?: string | undefined;
+  ctaLabel?: string | undefined;
+  ctaI18nKey?: string | undefined;
+  secondaryHref?: string | undefined;
+  secondaryLabel?: string | undefined;
+  secondaryI18nKey?: string | undefined;
+}
+
+const {
+  eyebrow,
+  eyebrowI18nKey,
+  title,
+  titleI18nKey,
+  description,
+  descriptionI18nKey,
+  ctaHref,
+  ctaLabel,
+  ctaI18nKey,
+  secondaryHref,
+  secondaryLabel,
+  secondaryI18nKey,
+} = Astro.props;
+
+const hasActions = (ctaHref && ctaLabel) || (secondaryHref && secondaryLabel);
+---
+
+<section class="relative overflow-hidden border-b-2 sm:border-b-4 border-border bg-card">
+  <!-- Constructivist geometric grid lines in the background -->
+  <div
+    class="pointer-events-none absolute inset-0 opacity-10 bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:24px_24px]"
+    aria-hidden="true"
+  ></div>
+
+  <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
+      <div>
+        {
+          eyebrow && (
+            <div class="mb-4">
+              <span
+                class="inline-block border-2 border-border bg-bauhaus-yellow px-3 py-1 font-mono text-xs font-black uppercase tracking-widest text-stark-black shadow-[2px_2px_0px_0px_var(--color-border)]"
+                data-i18n={eyebrowI18nKey}
+              >
+                {eyebrow}
+              </span>
+            </div>
+          )
+        }
+
+        <h1
+          class="font-sans text-4xl font-black uppercase tracking-tighter text-text sm:text-6xl lg:text-7xl leading-[0.9]"
+          data-i18n={titleI18nKey}
+        >
+          {title}
+        </h1>
+
+        <p
+          class="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-text-muted sm:text-xl"
+          data-i18n={descriptionI18nKey}
+        >
+          {description}
+        </p>
+
+        {
+          hasActions ? (
+            <div class="mt-8 flex flex-wrap gap-4">
+              {ctaHref && ctaLabel && (
+                <a
+                  href={ctaHref}
+                  class="bauhaus-btn inline-flex items-center justify-center bg-bauhaus-red px-6 py-3.5 text-sm font-black uppercase tracking-wider text-pure-white hover:bg-bauhaus-red/90"
+                  data-i18n={ctaI18nKey}
+                >
+                  {ctaLabel}
+                </a>
+              )}
+              {secondaryHref && secondaryLabel && (
+                <a
+                  href={secondaryHref}
+                  class="bauhaus-btn inline-flex items-center justify-center bg-surface px-6 py-3.5 text-sm font-black uppercase tracking-wider text-text hover:bg-bauhaus-yellow hover:text-stark-black"
+                  data-i18n={secondaryI18nKey}
+                >
+                  {secondaryLabel}
+                </a>
+              )}
+            </div>
+          ) : null
+        }
+
+        <slot />
+      </div>
+
+      <!-- Constructivist Graphic Composition Panel (Desktop) -->
+      <div class="relative hidden h-64 w-full items-center justify-center lg:flex" aria-hidden="true">
+        <div class="relative size-64 border-4 border-border bg-surface p-4 shadow-[10px_10px_0px_0px_var(--color-border)]">
+          <!-- Crosshair coordinate lines -->
+          <div class="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 bg-border"></div>
+          <div class="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-border"></div>
+
+          <!-- Red Circle -->
+          <div class="absolute top-4 left-4 size-28 rounded-full border-4 border-border bg-bauhaus-red shadow-[4px_4px_0px_0px_var(--color-border)]"></div>
+
+          <!-- Yellow Diamond (45 deg) -->
+          <div class="absolute right-6 bottom-6 size-20 rotate-45 border-4 border-border bg-bauhaus-yellow shadow-[4px_4px_0px_0px_var(--color-border)]"></div>
+
+          <!-- Blue Rectangle -->
+          <div class="absolute right-4 top-4 h-16 w-24 border-4 border-border bg-bauhaus-blue opacity-90 shadow-[4px_4px_0px_0px_var(--color-border)]"></div>
+
+          <!-- Central constructivist focal stamp -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-border bg-stark-black px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-pure-white">
+            SVX · POSTER 26
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

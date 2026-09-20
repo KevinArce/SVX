@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <pattern id="bauhaus-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2" fill="#333333" />
+    </pattern>
+  </defs>
+
+  <!-- Canvas Ground: Stark Black -->
+  <rect width="1200" height="630" fill="#121212" />
+
+  <!-- Subtle dot texture on left quadrant -->
+  <rect x="0" y="0" width="460" height="630" fill="url(#bauhaus-dots)" opacity="0.35" />
+
+  <!-- Diagonal Constructivist Slashes -->
+  <polygon points="1200,0 850,0 720,630 1200,630" fill="#1040C0" />
+  <polygon points="850,0 680,0 550,630 720,630" fill="#D02020" />
+  <polygon points="680,0 580,0 450,630 550,630" fill="#F0C020" />
+
+  <!-- Heavy Outer Architectural Framing -->
+  <rect x="24" y="24" width="1152" height="582" fill="none" stroke="#F0F0F0" stroke-width="8" />
+
+  <!-- Content Card Block -->
+  <rect x="64" y="64" width="620" height="502" fill="#121212" stroke="#F0F0F0" stroke-width="6" />
+
+  <!-- Bauhaus Brand Triad Header -->
+  <g transform="translate(104, 110)">
+    <circle cx="20" cy="20" r="18" fill="#D02020" stroke="#F0F0F0" stroke-width="3" />
+    <rect x="56" y="2" width="36" height="36" fill="#1040C0" stroke="#F0F0F0" stroke-width="3" />
+    <polygon points="128,38 110,2 146,2" fill="#F0C020" stroke="#F0F0F0" stroke-width="3" />
+    <text x="175" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif" font-weight="900" font-size="28" fill="#F0C020" letter-spacing="4">GUÍA CULTURAL</text>
+  </g>
+
+  <!-- Giant Bauhaus Title -->
+  <text x="104" y="260" font-family="-apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif" font-weight="900" font-size="110" fill="#FFFFFF" letter-spacing="-3">SVX</text>
+
+  <rect x="104" y="290" width="540" height="8" fill="#F0C020" />
+
+  <!-- Subtitle -->
+  <text x="104" y="355" font-family="-apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="1">CENTRO HISTÓRICO</text>
+  <text x="104" y="400" font-family="-apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif" font-weight="800" font-size="26" fill="#D02020" letter-spacing="3">SAN SALVADOR, EL SALVADOR</text>
+
+  <!-- Tagline badge -->
+  <rect x="104" y="440" width="540" height="52" fill="#F0F0F0" stroke="#121212" stroke-width="3" />
+  <text x="124" y="475" font-family="-apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif" font-weight="900" font-size="17" fill="#121212" letter-spacing="1">MONUMENTOS · TOURS GUIADOS · GASTRONOMÍA</text>
+
+  <!-- Right Side Architectural / Geometric Accents -->
+  <g transform="translate(860, 160)">
+    <!-- Architectural Monument Silhouetted in pure Bauhaus Geometry -->
+    <polygon points="120,40 220,130 20,130" fill="#F0C020" stroke="#121212" stroke-width="4" />
+    <circle cx="120,95" r="22" fill="#D02020" stroke="#121212" stroke-width="4" />
+    <rect x="40" y="145" width="35" height="150" fill="#F0F0F0" stroke="#121212" stroke-width="4" />
+    <rect x="102" y="145" width="36" height="150" fill="#D02020" stroke="#121212" stroke-width="4" />
+    <rect x="165" y="145" width="35" height="150" fill="#F0F0F0" stroke="#121212" stroke-width="4" />
+    <rect x="15" y="305" width="210" height="24" fill="#F0C020" stroke="#121212" stroke-width="4" />
+  </g>
+</svg>

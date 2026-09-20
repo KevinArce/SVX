@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroSection from '../../components/HeroSection.astro';
+import MonumentFilter from '../../components/islands/MonumentFilter';
+import type { FilterableMonument } from '../../components/islands/MonumentFilter';
+
+import { breadcrumbSchema, collectionPageSchema } from '../../lib/schema';
+
+const monuments = (await getCollection('monuments')).sort(
+  (a, b) => a.data.yearBuilt - b.data.yearBuilt,
+);
+
+const items: FilterableMonument[] = await Promise.all(
+  monuments.map(async (entry) => {
+    const image = await getImage({ src: entry.data.heroImage });
+    return {
+      slug: entry.id,
+      title: entry.data.title,
+      shortDescription: entry.data.shortDescription,
+      architecturalStyle: entry.data.architecturalStyle,
+      yearBuilt: entry.data.yearBuilt,
+      zone: entry.data.zone,
+      imageSrc: image.src,
+      imageAlt: entry.data.heroImageAlt,
+      href: `/monumentos/${entry.id}/`,
+    };
+  }),
+);
+
+const title = 'Monumentos';
+const description =
+  'Los monumentos históricos de San Salvador: estilo, año de construcción, horarios y ubicación.';
+
+const breadcrumbs = breadcrumbSchema(
+  [
+    { name: 'Inicio', path: '/' },
+    { name: 'Monumentos', path: '/monumentos/' },
+  ],
+  Astro.site,
+);
+
+const collectionSchema = collectionPageSchema(
+  title,
+  description,
+  '/monumentos/',
+  monuments.map((m) => ({ name: m.data.title, path: `/monumentos/${m.id}/` })),
+  Astro.site,
+);
+
+const jsonLd = [collectionSchema, breadcrumbs];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd} pageTitleKey="monuments.title">
+  <HeroSection
+    eyebrow="Directorio"
+    eyebrowI18nKey="monuments.eyebrow"
+    title={title}
+    titleI18nKey="monuments.title"
+    description={description}
+    descriptionI18nKey="monuments.description"
+  />
+
+  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+    <MonumentFilter client:idle monuments={items} />
+  </section>
+</BaseLayout>

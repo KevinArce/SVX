@@ -1,0 +1,193 @@
+---
+import { getCollection, getEntries, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import { BadgeDollarSign, CalendarDays, Clock, Landmark, MapPin } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MiniMap from '../../components/MiniMap.astro';
+import Pill from '../../components/Pill.astro';
+import RestaurantCard from '../../components/RestaurantCard.astro';
+import Timeline from '../../components/Timeline.astro';
+import { breadcrumbSchema, monumentSchema } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const monuments = await getCollection('monuments');
+  return monuments.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const nearby = data.nearbyRestaurants?.length ? await getEntries(data.nearbyRestaurants) : [];
+
+const allMonuments = await getCollection('monuments');
+const context = allMonuments.filter(
+  (item) => item.data.zone === 'centro-historico' || item.id === entry.id,
+);
+const points = context.map((item) => ({
+  label: item.data.title.split(' ').slice(0, 2).join(' '),
+  lat: item.data.coordinates.lat,
+  lng: item.data.coordinates.lng,
+  current: item.id === entry.id,
+}));
+
+const specs = [
+  { labelKey: 'detail.specStyle', icon: Landmark, label: 'Estilo', value: data.architecturalStyle, valueKey: `monuments.${entry.id}.architecturalStyle` },
+  { labelKey: 'detail.specYear', icon: CalendarDays, label: 'Año', value: String(data.yearBuilt), valueKey: undefined },
+  { labelKey: 'detail.specHours', icon: Clock, label: 'Horario', value: data.visitingHours, valueKey: `monuments.${entry.id}.visitingHours` },
+  { labelKey: 'detail.specAdmission', icon: BadgeDollarSign, label: 'Entrada', value: data.admission, valueKey: `monuments.${entry.id}.admission` },
+];
+
+const breadcrumbs = breadcrumbSchema(
+  [
+    { name: 'Inicio', path: '/' },
+    { name: 'Monumentos', path: '/monumentos/' },
+    { name: data.title, path: `/monumentos/${entry.id}/` },
+  ],
+  Astro.site,
+);
+const jsonLd = [
+  monumentSchema(entry, Astro.site, data.ogImage?.src ?? data.heroImage.src),
+  breadcrumbs,
+];
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.shortDescription}
+  ogImage={data.ogImage?.src ?? data.heroImage.src}
+  ogImageAlt={data.heroImageAlt}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article>
+    <!-- Header Section -->
+    <div class="border-b-2 sm:border-b-4 border-border bg-surface">
+      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <nav aria-label="Ruta de navegación" data-i18n-attr="aria-label:detail.breadcrumbs" class="mb-6 font-mono text-xs font-black uppercase tracking-wider text-text-muted">
+          <a href="/monumentos/" data-i18n="nav.monuments" class="hover:text-bauhaus-red transition-colors">Monumentos</a>
+          <span aria-hidden="true" class="mx-2 text-border">/</span>
+          <span aria-current="page" class="text-text">{data.title}</span>
+        </nav>
+
+        <div class="mb-4 flex flex-wrap gap-2">
+          <Pill tone="gold">
+            <span data-i18n={`monuments.${entry.id}.architecturalStyle`}>{data.architecturalStyle}</span>
+          </Pill>
+          {
+            data.zone === 'otra-zona' && (
+              <Pill tone="warn">
+                <MapPin aria-hidden="true" class="size-3.5" />
+                <span data-i18n="badge.outsideCenterFull">Fuera del Centro Histórico</span>
+              </Pill>
+            )
+          }
+        </div>
+
+        <h1 class="font-sans text-4xl sm:text-6xl font-black uppercase tracking-tighter text-text leading-[0.9]">
+          {data.title}
+        </h1>
+
+        <p class="mt-5 max-w-3xl text-lg sm:text-xl font-medium leading-relaxed text-text-muted" data-i18n={`monuments.${entry.id}.shortDescription`}>
+          {data.shortDescription}
+        </p>
+      </div>
+    </div>
+
+    <!-- Monument Hero Image Frame -->
+    <div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6 lg:px-8">
+      <div class="aspect-[1200/630] w-full overflow-hidden rounded-none border-2 sm:border-4 border-border bg-card shadow-[8px_8px_0px_0px_var(--color-border)] sm:shadow-[12px_12px_0px_0px_var(--color-border)]">
+        <Image
+          src={data.heroImage}
+          alt={data.heroImageAlt}
+          class="h-full w-full object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+
+    <!-- Main Content & Constructivist Ficha Sidebar -->
+    <div class="mx-auto mt-14 grid max-w-6xl grid-cols-1 gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_21rem] lg:px-8">
+      <div class="min-w-0">
+        <div class="prose" data-i18n-html={`monuments.${entry.id}.contentHtml`}>
+          <Content />
+        </div>
+
+        {
+          data.timeline && data.timeline.length > 0 && (
+            <div class="mt-16 border-t-2 sm:border-t-4 border-border pt-12">
+              <Timeline items={data.timeline} monumentId={entry.id} heading="Cronología histórica" />
+            </div>
+          )
+        }
+
+        <div class="mt-16 border-t-2 sm:border-t-4 border-border pt-12">
+          <MiniMap points={points} focus={data.coordinates} heading="Dónde está" />
+        </div>
+      </div>
+
+      <!-- Constructivist Ficha Technical Spec Sheet -->
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <div class="mb-4 flex items-center gap-2.5">
+          <span class="size-3.5 rounded-none bg-bauhaus-red border border-border inline-block" aria-hidden="true" />
+          <h2 class="font-sans text-2xl font-black uppercase tracking-tight text-text" data-i18n="detail.specsTitle">Ficha técnica</h2>
+        </div>
+        <dl class="divide-y-2 divide-border overflow-hidden rounded-none border-2 sm:border-4 border-border bg-card shadow-[6px_6px_0px_0px_var(--color-border)]">
+          {
+            specs.map((spec) => (
+              <div class="flex items-start gap-3.5 p-4.5">
+                <spec.icon aria-hidden="true" class="mt-0.5 size-5 shrink-0 text-bauhaus-blue" />
+                <div class="min-w-0">
+                  <dt class="font-mono text-xs font-black uppercase tracking-wider text-text-muted" data-i18n={spec.labelKey}>
+                    {spec.label}
+                  </dt>
+                  <dd
+                    class="mt-1 font-sans text-sm font-black uppercase text-text"
+                    {...spec.valueKey ? { 'data-i18n': spec.valueKey } : {}}
+                  >
+                    {spec.value}
+                  </dd>
+                </div>
+              </div>
+            ))
+          }
+        </dl>
+      </aside>
+    </div>
+
+    <!-- Nearby Gastronomy Section -->
+    {
+      nearby.length > 0 && (
+        <section class="mt-20 border-t-2 sm:border-t-4 border-border bg-surface py-16">
+          <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-8 border-b-2 sm:border-b-4 border-border pb-4">
+              <span
+                class="mb-2 inline-block border-2 border-border bg-bauhaus-yellow px-3 py-1 font-mono text-xs font-black uppercase tracking-widest text-stark-black shadow-[2px_2px_0px_0px_var(--color-border)]"
+                data-i18n="detail.nearbyBadge"
+              >
+                Gastronomía vecina
+              </span>
+              <h2 class="font-sans text-3xl sm:text-4xl font-black uppercase tracking-tight text-text" data-i18n="detail.nearbyTitle">
+                Para comer cerca
+              </h2>
+              <p class="mt-1 font-medium text-text-muted" data-i18n="detail.nearbySubtitle">
+                Fichas referenciales: confirmá horarios y ubicación antes de ir.
+              </p>
+            </div>
+            <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {nearby.map((restaurant) => (
+                <li class="h-full">
+                  <RestaurantCard entry={restaurant} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

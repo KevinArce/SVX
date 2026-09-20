@@ -1,0 +1,148 @@
+---
+import { ExternalLink } from '@lucide/astro';
+
+interface Point {
+  label: string;
+  lat: number;
+  lng: number;
+  current?: boolean;
+}
+
+interface Props {
+  points: Point[];
+  /** Centred on this location when the OpenStreetMap link is opened. */
+  focus: { lat: number; lng: number };
+  heading?: string;
+}
+
+const { points, focus, heading = 'Ubicación' } = Astro.props;
+
+const WIDTH = 600;
+const HEIGHT = 340;
+const PAD = 50;
+
+const meanLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
+const cosLat = Math.cos((meanLat * Math.PI) / 180);
+
+const xs = points.map((p) => p.lng * cosLat);
+const ys = points.map((p) => p.lat);
+
+const minX = Math.min(...xs);
+const maxX = Math.max(...xs);
+const minY = Math.min(...ys);
+const maxY = Math.max(...ys);
+
+const spanX = maxX - minX || 0.0008;
+const spanY = maxY - minY || 0.0008;
+
+const scale = Math.min((WIDTH - PAD * 2) / spanX, (HEIGHT - PAD * 2) / spanY);
+const offsetX = (WIDTH - spanX * scale) / 2;
+const offsetY = (HEIGHT - spanY * scale) / 2;
+
+const plotted = points.map((p) => ({
+  ...p,
+  x: offsetX + (p.lng * cosLat - minX) * scale,
+  y: offsetY + (maxY - p.lat) * scale,
+}));
+
+const osmUrl = `https://www.openstreetmap.org/?mlat=${focus.lat}&mlon=${focus.lng}#map=17/${focus.lat}/${focus.lng}`;
+---
+
+<section aria-labelledby="minimap-heading">
+  <div class="mb-4 flex items-center gap-3">
+    <span class="size-3.5 rounded-none bg-bauhaus-blue border border-border inline-block" aria-hidden="true" />
+    <h2 id="minimap-heading" class="font-sans text-2xl font-black uppercase tracking-tight text-text" data-i18n="detail.locationTitle">
+      {heading}
+    </h2>
+  </div>
+
+  <div class="overflow-hidden rounded-none border-2 sm:border-4 border-border bg-card shadow-[6px_6px_0px_0px_var(--color-border)]">
+    <!-- Fixed aspect ratio: the box is reserved before paint, so no CLS. -->
+    <svg
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      class="block h-auto w-full"
+      style={`aspect-ratio: ${WIDTH} / ${HEIGHT}`}
+      role="img"
+      aria-label={`Mapa esquemático con ${points.length} ubicaciones. ${plotted
+        .map((p) => p.label)
+        .join(', ')}.`}
+    >
+      <rect width={WIDTH} height={HEIGHT} fill="var(--color-surface)" />
+
+      <!-- Architectural coordinate blueprint grid lines -->
+      <g stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4 4" opacity="0.35">
+        {[0.15, 0.3, 0.45, 0.6, 0.75, 0.9].map((f) => (
+          <line x1={WIDTH * f} y1="0" x2={WIDTH * f} y2={HEIGHT} />
+        ))}
+        {[0.2, 0.4, 0.6, 0.8].map((f) => (
+          <line x1="0" y1={HEIGHT * f} x2={WIDTH} y2={HEIGHT * f} />
+        ))}
+      </g>
+
+      <!-- Frame corner alignment marks -->
+      <g stroke="var(--color-border)" stroke-width="2">
+        <line x1="10" y1="10" x2="25" y2="10" />
+        <line x1="10" y1="10" x2="10" y2="25" />
+        <line x1={WIDTH - 10} y1="10" x2={WIDTH - 25} y2="10" />
+        <line x1={WIDTH - 10} y1="10" x2={WIDTH - 10} y2="25" />
+        <line x1="10" y1={HEIGHT - 10} x2="25" y2={HEIGHT - 10} />
+        <line x1="10" y1={HEIGHT - 10} x2="10" y2={HEIGHT - 25} />
+        <line x1={WIDTH - 10} y1={HEIGHT - 10} x2={WIDTH - 25} y2={HEIGHT - 10} />
+        <line x1={WIDTH - 10} y1={HEIGHT - 10} x2={WIDTH - 10} y2={HEIGHT - 25} />
+      </g>
+
+      {
+        plotted.map((p) => (
+          <g>
+            {p.current ? (
+              <g>
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r="13"
+                  fill="#D02020"
+                  stroke="var(--color-border)"
+                  stroke-width="3"
+                />
+                <circle cx={p.x} cy={p.y} r="4" fill="#FFFFFF" />
+              </g>
+            ) : (
+              <rect
+                x={p.x - 7}
+                y={p.y - 7}
+                width="14"
+                height="14"
+                fill="#1040C0"
+                stroke="var(--color-border)"
+                stroke-width="2"
+              />
+            )}
+            <text
+              x={p.x}
+              y={p.y - (p.current ? 22 : 18)}
+              text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13"
+              font-weight={p.current ? '900' : '700'}
+              fill="var(--color-text)"
+              letter-spacing="0.02em"
+            >
+              {p.label.toUpperCase()}
+            </text>
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+
+  <a
+    href={osmUrl}
+    rel="noopener noreferrer"
+    target="_blank"
+    class="mt-4 inline-flex items-center gap-2 border-2 border-border bg-surface px-4 py-2 font-mono text-xs font-black uppercase tracking-wider text-text shadow-[2px_2px_0px_0px_var(--color-border)] hover:bg-bauhaus-yellow hover:text-stark-black transition-colors"
+  >
+    <ExternalLink aria-hidden="true" class="size-4 text-bauhaus-blue" />
+    <span data-i18n="detail.osmLink">Ver en OpenStreetMap</span>
+    <span class="sr-only" data-i18n="detail.osmTabNotice">(se abre en una pestaña nueva)</span>
+  </a>
+</section>

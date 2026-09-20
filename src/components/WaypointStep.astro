@@ -1,0 +1,82 @@
+---
+import { Image } from 'astro:assets';
+import { Clock, Lightbulb } from '@lucide/astro';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  order: number;
+  title: string;
+  href: string;
+  walkingTip: string;
+  walkingTipI18nKey?: string | undefined;
+  estimatedMinutes: number;
+  image: ImageMetadata;
+  imageAlt: string;
+  architecturalStyle: string;
+  styleI18nKey?: string | undefined;
+}
+
+const {
+  order,
+  title,
+  href,
+  walkingTip,
+  walkingTipI18nKey,
+  estimatedMinutes,
+  image,
+  imageAlt,
+  architecturalStyle,
+  styleI18nKey,
+} = Astro.props;
+---
+
+<li class="relative pb-10 last:pb-0">
+  <span
+    aria-hidden="true"
+    class="absolute top-1 -left-[2.8125rem] flex size-10 items-center justify-center rounded-full border-2 border-border bg-bauhaus-red font-sans text-xl font-black text-pure-white shadow-[3px_3px_0px_0px_var(--color-border)]"
+  >
+    {order}
+  </span>
+
+  <div class="rounded-none border-2 sm:border-4 border-border bg-card p-5 shadow-[4px_4px_0px_0px_var(--color-border)]">
+    <div class="flex flex-col gap-5 sm:flex-row">
+      <div class="aspect-[1200/630] w-full shrink-0 overflow-hidden rounded-none border-2 border-border bg-surface sm:w-52">
+        <Image
+          src={image}
+          alt={imageAlt}
+          class="h-full w-full object-cover grayscale contrast-125 transition-all duration-300 hover:grayscale-0"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span
+            class="border border-border bg-bauhaus-yellow px-2 py-0.5 font-mono text-xs font-black uppercase text-stark-black"
+            {...styleI18nKey ? { 'data-i18n': styleI18nKey } : {}}
+          >
+            {architecturalStyle}
+          </span>
+          <span class="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-text-muted">
+            <Clock aria-hidden="true" class="size-3.5 text-bauhaus-red" />
+            {estimatedMinutes} min
+          </span>
+        </div>
+
+        <h3 class="mt-2 font-sans text-2xl font-black uppercase tracking-tight text-text">
+          <a href={href} class="hover:text-bauhaus-blue transition-colors">
+            <span class="sr-only"><span data-i18n="tour.stopPrefix">Parada</span> {order}: </span>{title}
+          </a>
+        </h3>
+
+        <!-- Constructivist Alert Block for Walking Tip -->
+        <div class="mt-3 border-l-4 border-bauhaus-yellow bg-bauhaus-yellow/20 p-3.5 text-sm font-medium text-text">
+          <p class="flex items-start gap-2">
+            <Lightbulb aria-hidden="true" class="mt-0.5 size-4 shrink-0 text-stark-black" />
+            <span {...walkingTipI18nKey ? { 'data-i18n': walkingTipI18nKey } : {}}>{walkingTip}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</li>

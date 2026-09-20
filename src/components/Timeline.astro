@@ -1,0 +1,55 @@
+---
+interface Props {
+  items: ReadonlyArray<{ year: string; event: string }>;
+  heading?: string | undefined;
+  monumentId?: string | undefined;
+}
+
+const { items, heading, monumentId } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section aria-label={heading ?? 'Cronología'} data-i18n-attr="aria-label:detail.timelineTitle">
+      {heading && (
+        <div class="mb-6 flex items-center gap-3">
+          <span class="size-3.5 rounded-none bg-bauhaus-red border border-border inline-block" aria-hidden="true" />
+          <h2 class="font-sans text-2xl font-black uppercase tracking-tight text-text" data-i18n="detail.timelineTitle">
+            {heading}
+          </h2>
+        </div>
+      )}
+
+      <ol class="relative border-l-4 border-border pl-7">
+        {items.map((item, index) => {
+          const isEven = index % 2 === 0;
+          return (
+            <li class="relative pb-8 last:pb-0">
+              {/* Alternating Bauhaus geometric node stamps on the 4px rail */}
+              {isEven ? (
+                <span
+                  aria-hidden="true"
+                  class="absolute top-1 -left-[2.1875rem] block size-4 rounded-full border-2 border-border bg-bauhaus-red shadow-[2px_2px_0px_0px_var(--color-border)]"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  class="absolute top-1.5 -left-[2.125rem] block size-3.5 rotate-45 border-2 border-border bg-bauhaus-yellow shadow-[2px_2px_0px_0px_var(--color-border)]"
+                />
+              )}
+              <p class="font-sans text-xl font-black uppercase tracking-tight text-bauhaus-blue">
+                {item.year}
+              </p>
+              <p
+                class="mt-1.5 text-sm font-medium leading-relaxed text-text-muted"
+                {...monumentId ? { 'data-i18n': `monuments.${monumentId}.timeline.${index}.event` } : {}}
+              >
+                {item.event}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  )
+}

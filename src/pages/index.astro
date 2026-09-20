@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import { ArrowRight } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroSection from '../components/HeroSection.astro';
+import MonumentCard from '../components/MonumentCard.astro';
+import TourCard from '../components/TourCard.astro';
+import { SITE } from '../lib/site';
+import { organizationSchema, websiteSchema } from '../lib/schema';
+
+const monuments = await getCollection('monuments');
+const featured = monuments
+  .filter((entry) => entry.data.featured)
+  .sort((a, b) => a.data.yearBuilt - b.data.yearBuilt);
+
+const tours = await getCollection('tours');
+const jsonLd = [websiteSchema(Astro.site), organizationSchema(Astro.site)];
+---
+
+<BaseLayout title={SITE.title} description={SITE.description} jsonLd={jsonLd} pageTitleKey="site.title">
+  <HeroSection
+    eyebrow="San Salvador, El Salvador"
+    eyebrowI18nKey="home.eyebrow"
+    title="El Centro Histórico, a pie"
+    titleI18nKey="home.title"
+    description="Cuatro monumentos en pocas cuadras, una ruta para recorrerlos en orden y dónde parar a comer sin salir de la zona."
+    descriptionI18nKey="home.description"
+    ctaHref="/tours/"
+    ctaLabel="Ver la ruta"
+    ctaI18nKey="home.ctaRoute"
+    secondaryHref="/monumentos/"
+    secondaryLabel="Explorar monumentos"
+    secondaryI18nKey="home.ctaMonuments"
+  />
+
+  <section class="border-b-2 sm:border-b-4 border-border bg-surface px-4 py-16 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-10 flex flex-wrap items-end justify-between gap-4 border-b-2 sm:border-b-4 border-border pb-4">
+        <div>
+          <span
+            class="mb-2 inline-block border-2 border-border bg-bauhaus-yellow px-3 py-1 font-mono text-xs font-black uppercase tracking-widest text-stark-black shadow-[2px_2px_0px_0px_var(--color-border)]"
+            data-i18n="home.catalogBadge"
+          >
+            Catálogo
+          </span>
+          <h2 class="font-sans text-3xl sm:text-4xl font-black uppercase tracking-tight text-text" data-i18n="home.catalogTitle">
+            Monumentos destacados
+          </h2>
+          <p class="mt-1 font-medium text-text-muted" data-i18n="home.catalogSubtitle">
+            Los sitios que definen el perfil arquitectónico del centro.
+          </p>
+        </div>
+        <a
+          href="/monumentos/"
+          class="inline-flex items-center gap-2 border-2 border-border bg-card px-4 py-2 font-mono text-xs font-black uppercase tracking-wider text-text shadow-[3px_3px_0px_0px_var(--color-border)] hover:bg-bauhaus-yellow hover:text-stark-black transition-colors"
+        >
+          <span data-i18n="home.viewAll">Ver todos</span> ({monuments.length})
+          <ArrowRight aria-hidden="true" class="size-4" />
+        </a>
+      </div>
+
+      <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          featured.map((entry, index) => (
+            <li class="h-full">
+              <MonumentCard entry={entry} eager={index === 0} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="border-b-2 sm:border-b-4 border-border bg-bauhaus-blue px-4 py-16 text-pure-white sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-10 border-b-2 sm:border-b-4 border-pure-white pb-4">
+        <span
+          class="mb-2 inline-block border-2 border-stark-black bg-bauhaus-yellow px-3 py-1 font-mono text-xs font-black uppercase tracking-widest text-stark-black shadow-[2px_2px_0px_0px_#121212]"
+          data-i18n="home.itineraryBadge"
+        >
+          Itinerario sugerido
+        </span>
+        <h2 class="font-sans text-3xl sm:text-4xl font-black uppercase tracking-tight text-pure-white" data-i18n="home.itineraryTitle">
+          Ruta guiada a pie
+        </h2>
+        <p class="mt-1 font-medium text-pure-white/90" data-i18n="home.itinerarySubtitle">
+          Un circuito a pie con paradas en orden, tiempos estimados y arquitectura viva.
+        </p>
+      </div>
+
+      <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          tours.map((entry) => (
+            <li class="h-full">
+              <TourCard entry={entry} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

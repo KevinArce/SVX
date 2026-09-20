@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Página no encontrada';
+const description = 'La dirección que buscás no existe o cambió de lugar.';
+---
+
+<BaseLayout title={title} description={description} noindex pageTitleKey="error.title">
+  <section class="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6 lg:px-8">
+    <div class="mx-auto inline-flex items-center justify-center gap-3 border-2 border-border bg-card px-5 py-2 shadow-[4px_4px_0px_0px_var(--color-border)]">
+      <span class="size-3 rounded-full bg-bauhaus-red inline-block" aria-hidden="true"></span>
+      <span class="font-mono text-xs font-black uppercase tracking-widest text-text" data-i18n="error.badge">Error de navegación</span>
+      <span class="size-3 bg-bauhaus-yellow inline-block [clip-path:polygon(50%_0%,0%_100%,100%_100%)]" aria-hidden="true"></span>
+    </div>
+
+    <p class="mt-6 font-sans text-8xl sm:text-9xl font-black tracking-tighter text-bauhaus-red leading-none">
+      404
+    </p>
+
+    <h1 class="mt-6 font-sans text-3xl sm:text-5xl font-black uppercase tracking-tight text-text" data-i18n="error.title">
+      {title}
+    </h1>
+
+    <p class="mx-auto mt-4 max-w-md text-lg font-medium text-text-muted" data-i18n="error.description">
+      {description}
+    </p>
+
+    <div class="mt-10 flex flex-wrap justify-center gap-4">
+      <a
+        href="/"
+        class="bauhaus-btn inline-flex items-center justify-center bg-bauhaus-red px-6 py-3.5 text-sm font-black uppercase tracking-wider text-pure-white hover:bg-bauhaus-red/90"
+        data-i18n="error.homeBtn"
+      >
+        Volver al inicio
+      </a>
+      <a
+        href="/monumentos/"
+        class="bauhaus-btn inline-flex items-center justify-center bg-card px-6 py-3.5 text-sm font-black uppercase tracking-wider text-text hover:bg-bauhaus-yellow hover:text-stark-black"
+        data-i18n="error.monumentsBtn"
+      >
+        Ver monumentos
+      </a>
+    </div>
+  </section>
+</BaseLayout>

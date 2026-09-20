@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroSection from '../../components/HeroSection.astro';
+import TourCard from '../../components/TourCard.astro';
+
+import { breadcrumbSchema, collectionPageSchema } from '../../lib/schema';
+
+const tours = await getCollection('tours');
+
+const title = 'Tours guiados';
+const description =
+  'Rutas a pie por el Centro Histórico de San Salvador, con paradas en orden, tiempos estimados y consejos de caminata.';
+
+const breadcrumbs = breadcrumbSchema(
+  [
+    { name: 'Inicio', path: '/' },
+    { name: 'Tours', path: '/tours/' },
+  ],
+  Astro.site,
+);
+
+const collectionSchema = collectionPageSchema(
+  title,
+  description,
+  '/tours/',
+  tours.map((t) => ({ name: t.data.title, path: `/tours/${t.id}/` })),
+  Astro.site,
+);
+
+const jsonLd = [collectionSchema, breadcrumbs];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd} pageTitleKey="tours.title">
+  <HeroSection
+    eyebrow="Recorridos"
+    eyebrowI18nKey="tours.eyebrow"
+    title={title}
+    titleI18nKey="tours.title"
+    description={description}
+    descriptionI18nKey="tours.description"
+  />
+
+  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+    <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        tours.map((entry, index) => (
+          <li class="h-full">
+            <TourCard entry={entry} eager={index === 0} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

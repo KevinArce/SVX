@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { Clock, Footprints, Route } from '@lucide/astro';
+import type { CollectionEntry } from 'astro:content';
+import Pill from './Pill.astro';
+
+interface Props {
+  entry: CollectionEntry<'tours'>;
+  eager?: boolean;
+}
+
+const { entry, eager = false } = Astro.props;
+const { data } = entry;
+const href = `/tours/${entry.id}/`;
+---
+
+<article
+  class="card-lift group relative flex h-full flex-col rounded-none border-2 sm:border-4 border-border bg-card shadow-[6px_6px_0px_0px_var(--color-border)] sm:shadow-[8px_8px_0px_0px_var(--color-border)]"
+>
+  <!-- Bauhaus Cadmium Yellow Header Banner -->
+  <div class="flex items-center justify-between border-b-2 sm:border-b-4 border-border bg-bauhaus-yellow px-4 py-2">
+    <span class="font-mono text-xs font-black uppercase tracking-widest text-stark-black" data-i18n="tourCard.walkingCircuit">
+      Circuito a pie
+    </span>
+    <span class="inline-block size-3 rounded-full border border-stark-black bg-bauhaus-red" aria-hidden="true"></span>
+  </div>
+
+  <div class="relative aspect-[1200/630] w-full overflow-hidden border-b-2 sm:border-b-4 border-border bg-surface">
+    <Image
+      src={data.coverImage}
+      alt={data.coverImageAlt}
+      class="h-full w-full object-cover grayscale contrast-125 transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
+      loading={eager ? 'eager' : 'lazy'}
+      {...eager ? { fetchpriority: 'high' as const } : {}}
+    />
+  </div>
+
+  <div class="flex flex-1 flex-col p-5">
+    <h3 class="font-sans text-2xl font-black uppercase tracking-tight text-text transition-colors group-hover:text-bauhaus-blue">
+      <a href={href} class="after:absolute after:inset-0 focus:outline-none">{data.title}</a>
+    </h3>
+
+    {data.subtitle && (
+      <p class="mt-2.5 flex-1 text-sm leading-relaxed text-text-muted" data-i18n={`tours.${entry.id}.subtitle`}>
+        {data.subtitle}
+      </p>
+    )}
+
+    <div class="mt-5 flex flex-wrap gap-2 border-t-2 border-border pt-3">
+      <Pill>
+        <Clock aria-hidden="true" class="size-3.5 text-bauhaus-red" />
+        {Math.round(data.durationMinutes / 60)} h
+      </Pill>
+      <Pill>
+        <Route aria-hidden="true" class="size-3.5 text-bauhaus-blue" />
+        {data.distanceKm} km
+      </Pill>
+      <Pill tone="gold">
+        <Footprints aria-hidden="true" class="size-3.5 text-stark-black" />
+        <span data-i18n={`tours.${entry.id}.difficulty`}>{data.difficulty}</span>
+      </Pill>
+    </div>
+  </div>
+</article>

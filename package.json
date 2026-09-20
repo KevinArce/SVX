@@ -1,0 +1,45 @@
+{
+  "name": "svx",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Guía arquitectónica constructivista para recorrer a pie el Centro Histórico de San Salvador.",
+  "author": "Kevin Arce",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KevinArce/SVX.git"
+  },
+  "homepage": "https://svx.kevinarce.workers.dev",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "audit": "node scripts/audit.mjs",
+    "placeholders": "node scripts/generate-placeholders.mjs",
+    "og-images": "node scripts/generate-og-images.mjs",
+    "favicons": "node scripts/generate-favicons.mjs"
+  },
+  "dependencies": {
+    "@astrojs/preact": "^6.0.5",
+    "@astrojs/sitemap": "^3.7.4",
+    "@lucide/astro": "^1.47.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.3",
+    "leaflet": "^1.9.4",
+    "preact": "^10.29.8",
+    "tailwindcss": "^4.3.3",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/leaflet": "^1.9.22",
+    "@types/three": "^0.186.0",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=9.6.5"
+  }
+}

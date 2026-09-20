@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { Clock, MapPin, Utensils } from '@lucide/astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'restaurants'>;
+  eager?: boolean;
+}
+
+const { entry, eager = false } = Astro.props;
+const { data } = entry;
+---
+
+<article class="card-lift group relative flex h-full flex-col rounded-none border-2 sm:border-4 border-border bg-card shadow-[6px_6px_0px_0px_var(--color-border)]">
+  <div class="relative aspect-[1200/630] w-full overflow-hidden border-b-2 sm:border-b-4 border-border bg-surface">
+    <Image
+      src={data.heroImage}
+      alt={data.heroImageAlt}
+      class="h-full w-full object-cover grayscale contrast-125 transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
+      loading={eager ? 'eager' : 'lazy'}
+      {...eager ? { fetchpriority: 'high' as const } : {}}
+    />
+    <div class="absolute bottom-3 left-3 flex flex-wrap gap-2">
+      <span
+        class="inline-block border-2 border-border bg-bauhaus-yellow px-2.5 py-1 font-mono text-xs font-black uppercase text-stark-black shadow-[2px_2px_0px_0px_var(--color-border)]"
+        data-i18n={`restaurants.${entry.id}.cuisine`}
+      >
+        {data.cuisine}
+      </span>
+      <span class="inline-block border-2 border-border bg-stark-black px-2.5 py-1 font-mono text-xs font-black uppercase text-pure-white shadow-[2px_2px_0px_0px_var(--color-border)]">
+        {data.priceRange}
+      </span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 flex-col p-5">
+    <h3 class="font-sans text-2xl font-black uppercase tracking-tight text-text">{data.name}</h3>
+
+    <p class="mt-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
+      <MapPin aria-hidden="true" class="size-4 shrink-0 text-bauhaus-red" />
+      <span data-i18n={`restaurants.${entry.id}.zone`}>{data.zone}</span>
+    </p>
+
+    <div class="mt-4 flex-1 border-t-2 border-border pt-3">
+      <p class="text-sm leading-relaxed text-text">
+        <span class="inline-flex items-center gap-1.5 font-black uppercase text-xs tracking-wider text-bauhaus-blue">
+          <Utensils aria-hidden="true" class="size-3.5" />
+          <span data-i18n="gastronomy.try">Probá:</span>
+        </span>
+        {' '}<span class="font-medium" data-i18n={`restaurants.${entry.id}.mustTry`}>{data.mustTry}</span>
+      </p>
+    </div>
+
+    {
+      data.openHours && (
+        <p class="mt-4 flex items-center gap-1.5 font-mono text-xs font-bold text-text-muted">
+          <Clock aria-hidden="true" class="size-3.5" />
+          <span data-i18n={`restaurants.${entry.id}.openHours`}>{data.openHours}</span>
+        </p>
+      )
+    }
+  </div>
+</article>

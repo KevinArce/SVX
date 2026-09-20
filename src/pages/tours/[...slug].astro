@@ -1,0 +1,202 @@
+---
+import { getCollection, getEntries, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import { Clock, Footprints, Route, Sunrise } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Pill from '../../components/Pill.astro';
+import WaypointStep from '../../components/WaypointStep.astro';
+import TourViewSwitcher from '../../components/islands/TourViewSwitcher';
+import type { MapPoint } from '../../components/islands/TourMap';
+import type { TourStopData } from '../../components/islands/Tour3DViewer';
+import { breadcrumbSchema, tourSchema } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const tours = await getCollection('tours');
+  return tours.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const ordered = [...data.waypoints].sort((a, b) => a.order - b.order);
+const monuments = await getEntries(ordered.map((waypoint) => waypoint.monument));
+
+const stops = ordered.map((waypoint, index) => {
+  const monument = monuments[index]!;
+  return { waypoint, monument };
+});
+
+const mapPoints: MapPoint[] = stops.map(({ waypoint, monument }) => ({
+  slug: monument.id,
+  title: monument.data.title,
+  lat: monument.data.coordinates.lat,
+  lng: monument.data.coordinates.lng,
+  kind: 'monument' as const,
+  href: `/monumentos/${monument.id}/`,
+  order: waypoint.order,
+}));
+
+const tourStops: TourStopData[] = stops.map(({ waypoint, monument }) => ({
+  slug: monument.id,
+  order: waypoint.order,
+  title: monument.data.title,
+  architecturalStyle: monument.data.architecturalStyle,
+  lat: monument.data.coordinates.lat,
+  lng: monument.data.coordinates.lng,
+  walkingTip: waypoint.walkingTip,
+  estimatedMinutes: waypoint.estimatedMinutes,
+  href: `/monumentos/${monument.id}/`,
+  imageSrc: typeof monument.data.heroImage === 'string' ? monument.data.heroImage : monument.data.heroImage?.src,
+  imageAlt: monument.data.heroImageAlt,
+}));
+
+const breadcrumbs = breadcrumbSchema(
+  [
+    { name: 'Inicio', path: '/' },
+    { name: 'Tours', path: '/tours/' },
+    { name: data.title, path: `/tours/${entry.id}/` },
+  ],
+  Astro.site,
+);
+
+const tourLd = tourSchema(
+  entry,
+  Astro.site,
+  data.ogImage?.src ?? data.coverImage.src,
+  stops.map(({ monument }) => ({
+    name: monument.data.title,
+    slug: monument.id,
+    lat: monument.data.coordinates.lat,
+    lng: monument.data.coordinates.lng,
+  })),
+);
+
+const jsonLd = [tourLd, breadcrumbs];
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.subtitle ?? `Ruta a pie de ${data.distanceKm} km por el Centro Histórico.`}
+  ogImage={data.ogImage?.src ?? data.coverImage.src}
+  ogImageAlt={data.coverImageAlt}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article>
+    <!-- Header Section -->
+    <div class="border-b-2 sm:border-b-4 border-border bg-surface">
+      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <nav aria-label="Ruta de navegación" data-i18n-attr="aria-label:detail.breadcrumbs" class="mb-6 font-mono text-xs font-black uppercase tracking-wider text-text-muted">
+          <a href="/tours/" data-i18n="nav.tours" class="hover:text-bauhaus-red transition-colors">Tours</a>
+          <span aria-hidden="true" class="mx-2 text-border">/</span>
+          <span aria-current="page" class="text-text" data-i18n={`tours.${entry.id}.title`}>{data.title}</span>
+        </nav>
+
+        <h1 class="font-sans text-4xl sm:text-6xl font-black uppercase tracking-tighter text-text leading-[0.9]" data-i18n={`tours.${entry.id}.title`}>
+          {data.title}
+        </h1>
+
+        {data.subtitle && (
+          <p class="mt-4 max-w-3xl text-lg sm:text-xl font-medium leading-relaxed text-text-muted" data-i18n={`tours.${entry.id}.subtitle`}>
+            {data.subtitle}
+          </p>
+        )}
+
+        <div class="mt-6 flex flex-wrap gap-2.5">
+          <Pill tone="primary">
+            <Clock aria-hidden="true" class="size-3.5 text-pure-white" />
+            {data.durationMinutes} min
+          </Pill>
+          <Pill>
+            <Route aria-hidden="true" class="size-3.5 text-bauhaus-blue" />
+            {data.distanceKm} km
+          </Pill>
+          <Pill tone="gold">
+            <Footprints aria-hidden="true" class="size-3.5 text-stark-black" />
+            <span data-i18n={`tours.${entry.id}.difficulty`}>{data.difficulty}</span>
+          </Pill>
+          {
+            data.bestTime && (
+              <Pill>
+                <Sunrise aria-hidden="true" class="size-3.5 text-bauhaus-yellow" />
+                <span data-i18n={`tours.${entry.id}.bestTime`}>{data.bestTime}</span>
+              </Pill>
+            )
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Tour Cover Image Frame -->
+    <div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6 lg:px-8">
+      <div class="aspect-[1200/630] w-full overflow-hidden rounded-none border-2 sm:border-4 border-border bg-card shadow-[8px_8px_0px_0px_var(--color-border)] sm:shadow-[12px_12px_0px_0px_var(--color-border)]">
+        <Image
+          src={data.coverImage}
+          alt={data.coverImageAlt}
+          class="h-full w-full object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+
+    <!-- Prose Description -->
+    <div class="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="prose max-w-3xl" data-i18n-html={`tours.${entry.id}.contentHtml`}>
+        <Content />
+      </div>
+    </div>
+
+    <!-- Interactive Tour Exploration (3D Guide & 2D Map) -->
+    <section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-6 flex items-center gap-3">
+        <span class="size-3.5 rounded-none bg-bauhaus-blue border border-border inline-block" aria-hidden="true" />
+        <h2 class="font-sans text-3xl sm:text-4xl font-black uppercase tracking-tight text-text" data-i18n="tour.interactiveTitle">
+          Exploración interactiva del recorrido
+        </h2>
+      </div>
+      <TourViewSwitcher
+        client:visible
+        mapPoints={mapPoints}
+        stops={tourStops}
+        tourTitle={data.title}
+        drawRoute
+      />
+      <p class="mt-4 font-mono text-xs font-bold uppercase tracking-wider text-text-muted" data-i18n="tour.interactiveSubtitle">
+        Usa el selector superior para alternar entre la Guía 3D Isométrica y el mapa tradicional. Las paradas están numeradas en el orden de la marcha.
+      </p>
+    </section>
+
+    <!-- Itinerary Waypoints Section -->
+    <section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 flex items-center gap-3 border-b-2 sm:border-b-4 border-border pb-4">
+        <span class="size-3.5 rounded-full bg-bauhaus-red border border-border inline-block" aria-hidden="true" />
+        <h2 class="font-sans text-3xl sm:text-4xl font-black uppercase tracking-tight text-text" data-i18n="tour.itineraryTitle">
+          Itinerario y paradas
+        </h2>
+      </div>
+      <ol class="relative ml-10 border-l-4 border-border">
+        {
+          stops.map(({ waypoint, monument }, index) => (
+            <WaypointStep
+              order={waypoint.order}
+              title={monument.data.title}
+              href={`/monumentos/${monument.id}/`}
+              walkingTip={waypoint.walkingTip}
+              walkingTipI18nKey={`tours.${entry.id}.waypoints.${index}.walkingTip`}
+              estimatedMinutes={waypoint.estimatedMinutes}
+              image={monument.data.heroImage}
+              imageAlt={monument.data.heroImageAlt}
+              architecturalStyle={monument.data.architecturalStyle}
+              styleI18nKey={`monuments.${monument.id}.architecturalStyle`}
+            />
+          ))
+        }
+      </ol>
+    </section>
+  </article>
+</BaseLayout>

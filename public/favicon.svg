@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Bauhaus Constructivist Favicon for SVX -->
+  <!-- Stark Black Ground with Cadmium Yellow Framing -->
+  <rect width="64" height="64" fill="#121212" />
+  <rect x="2" y="2" width="60" height="60" fill="none" stroke="#F0C020" stroke-width="3" />
+
+  <!-- "SVX" Heavy Geometric Typography -->
+  <text
+    x="32"
+    y="26"
+    font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Arial Black', sans-serif"
+    font-weight="900"
+    font-size="16"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    letter-spacing="1"
+  >SVX</text>
+
+  <!-- Structural Constructivist Divider -->
+  <line x1="12" y1="33" x2="52" y2="33" stroke="#F0C020" stroke-width="2" />
+
+  <!-- Bauhaus Elemental Triad: Red Circle, Blue Square, Yellow Triangle -->
+  <circle cx="18" cy="45" r="6" fill="#D02020" />
+  <rect x="26" y="39" width="12" height="12" fill="#1040C0" />
+  <polygon points="45,51 51,39 57,51" fill="#F0C020" />
+</svg>

@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import { CalendarDays, MapPin } from '@lucide/astro';
+import type { CollectionEntry } from 'astro:content';
+import Pill from './Pill.astro';
+
+interface Props {
+  entry: CollectionEntry<'monuments'>;
+  /** The first card in a grid carries the LCP image, so it loads eagerly. */
+  eager?: boolean;
+}
+
+const { entry, eager = false } = Astro.props;
+const { data } = entry;
+const href = `/monumentos/${entry.id}/`;
+
+// Deterministic Bauhaus stamp for the corner badge
+const stampType = Math.abs(data.yearBuilt) % 3;
+---
+
+<article
+  class="card-lift group relative flex h-full flex-col rounded-none border-2 sm:border-4 border-border bg-card shadow-[6px_6px_0px_0px_var(--color-border)] sm:shadow-[8px_8px_0px_0px_var(--color-border)]"
+>
+  <!-- aspect-ratio reserves the box before the image decodes: no CLS. -->
+  <div class="relative aspect-[1200/630] w-full overflow-hidden border-b-2 sm:border-b-4 border-border bg-surface">
+    <Image
+      src={data.heroImage}
+      alt={data.heroImageAlt}
+      class="h-full w-full object-cover grayscale contrast-125 transition-all duration-300 group-hover:grayscale-0 group-hover:scale-105"
+      loading={eager ? 'eager' : 'lazy'}
+      {...eager ? { fetchpriority: 'high' as const } : {}}
+    />
+
+    <!-- Bauhaus Geometric Corner Stamp -->
+    <div
+      class="pointer-events-none absolute top-3 right-3 z-10 flex size-7 items-center justify-center border-2 border-border bg-card shadow-[2px_2px_0px_0px_var(--color-border)]"
+      aria-hidden="true"
+    >
+      {stampType === 0 && <span class="size-3.5 rounded-full bg-bauhaus-red inline-block" />}
+      {stampType === 1 && <span class="size-3.5 rounded-none bg-bauhaus-blue inline-block" />}
+      {stampType === 2 && (
+        <span class="size-3.5 bg-bauhaus-yellow inline-block [clip-path:polygon(50%_0%,0%_100%,100%_100%)]" />
+      )}
+    </div>
+  </div>
+
+  <div class="flex flex-1 flex-col p-5">
+    <div class="mb-3 flex flex-wrap gap-2">
+      <Pill tone="gold">
+        <span data-i18n={`monuments.${entry.id}.architecturalStyle`}>{data.architecturalStyle}</span>
+      </Pill>
+      {
+        data.zone === 'otra-zona' && (
+          <Pill tone="warn">
+            <MapPin aria-hidden="true" class="size-3.5" />
+            <span data-i18n="badge.outsideCenter">Fuera del Centro</span>
+          </Pill>
+        )
+      }
+    </div>
+
+    <h3 class="font-sans text-2xl font-black uppercase tracking-tight text-text transition-colors group-hover:text-bauhaus-blue">
+      <a href={href} class="after:absolute after:inset-0 focus:outline-none">
+        {data.title}
+      </a>
+    </h3>
+
+    <p class="mt-2.5 flex-1 text-sm leading-relaxed text-text-muted" data-i18n={`monuments.${entry.id}.shortDescription`}>
+      {data.shortDescription}
+    </p>
+
+    <div class="mt-5 pt-3 border-t-2 border-border flex items-center justify-between">
+      <span class="inline-flex items-center gap-1.5 border border-border bg-surface px-2.5 py-1 font-mono text-xs font-black uppercase tracking-wider text-text">
+        <CalendarDays aria-hidden="true" class="size-3.5 text-bauhaus-red" />
+        {data.yearBuilt}
+      </span>
+      <span
+        class="font-mono text-xs font-black uppercase tracking-widest text-text group-hover:translate-x-1 transition-transform"
+        data-i18n="card.viewDetails"
+      >
+        Ver ficha →
+      </span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,212 @@
+---
+import { Menu, Moon, Sun } from '@lucide/astro';
+import { NAV_LINKS, SITE, isActive } from '../lib/site';
+
+const pathname = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 border-b-2 sm:border-b-4 border-border bg-surface">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+    <a
+      href="/"
+      class="group inline-flex items-center gap-2.5 font-sans text-2xl sm:text-3xl font-black uppercase tracking-tighter text-text"
+      aria-label={`${SITE.name} — ir al inicio`}
+      data-i18n-attr="aria-label:site.logoAria"
+    >
+      <span>{SITE.name}</span>
+      <span class="inline-flex items-center gap-1.5" aria-hidden="true">
+        <span class="size-3.5 rounded-full bg-bauhaus-red inline-block border border-border"></span>
+        <span class="size-3.5 rounded-none bg-bauhaus-blue inline-block border border-border"></span>
+        <span class="size-3.5 bg-bauhaus-yellow inline-block border border-border [clip-path:polygon(50%_0%,0%_100%,100%_100%)]"></span>
+      </span>
+    </a>
+
+    <div class="flex items-center gap-2.5 sm:gap-4 lg:gap-6">
+      <nav aria-label="Navegación principal">
+        <!-- Desktop: plain list, no interactivity needed. -->
+        <ul class="hidden items-center gap-6 sm:flex">
+          {
+            NAV_LINKS.map((link) => {
+              const active = isActive(link.href, pathname);
+              return (
+                <li>
+                  <a
+                    href={link.href}
+                    aria-current={active ? 'page' : undefined}
+                    data-i18n={link.i18nKey}
+                    class:list={[
+                      'text-sm font-black uppercase tracking-widest transition-colors',
+                      active
+                        ? 'text-primary border-b-4 border-bauhaus-red pb-1'
+                        : 'text-text hover:text-bauhaus-red',
+                    ]}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+
+        <!-- Mobile drawer: <details> panel with zero javascript -->
+        <details class="group relative sm:hidden">
+          <summary
+            class="flex cursor-pointer list-none items-center gap-2 rounded-none border-2 border-border bg-card px-3 py-1.5 text-xs font-black uppercase tracking-wider text-text bauhaus-shadow-sm active:translate-x-[2px] active:translate-y-[2px]"
+          >
+            <Menu aria-hidden="true" class="size-4" />
+            <span data-i18n="nav.menu">Menú</span>
+          </summary>
+          <ul
+            class="absolute right-0 z-50 mt-2 w-56 rounded-none border-4 border-border bg-card p-3 shadow-[8px_8px_0px_0px_#121212] dark:shadow-[8px_8px_0px_0px_#F0F0F0]"
+          >
+            {
+              NAV_LINKS.map((link) => {
+                const active = isActive(link.href, pathname);
+                return (
+                  <li>
+                    <a
+                      href={link.href}
+                      aria-current={active ? 'page' : undefined}
+                      data-i18n={link.i18nKey}
+                      class:list={[
+                        'block px-3 py-2 text-sm font-black uppercase tracking-wider transition-colors',
+                        active
+                          ? 'bg-bauhaus-red text-white'
+                          : 'text-text hover:bg-bauhaus-yellow hover:text-stark-black',
+                      ]}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </details>
+      </nav>
+
+      <!-- Bauhaus Constructivist Language Switcher (ES / EN) -->
+      <div
+        id="lang-switcher"
+        class="inline-flex items-center rounded-none border-2 border-border bg-card p-0.5 shadow-[2px_2px_0px_0px_var(--color-border)]"
+        role="group"
+        aria-label="Selector de idioma / Language selector"
+        data-i18n-attr="aria-label:lang.aria"
+      >
+        <button
+          type="button"
+          data-lang-btn="es"
+          class="cursor-pointer px-2 py-1 font-mono text-xs font-black uppercase tracking-wider bg-bauhaus-red text-pure-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bauhaus-blue active:translate-x-[1px] active:translate-y-[1px]"
+          aria-pressed="true"
+          title="Cambiar a español"
+          aria-label="Cambiar a español"
+          data-i18n-attr="title:lang.toEs,aria-label:lang.toEs"
+        >
+          ES
+        </button>
+        <span class="text-border font-mono text-xs font-bold select-none px-0.5" aria-hidden="true">|</span>
+        <button
+          type="button"
+          data-lang-btn="en"
+          class="cursor-pointer px-2 py-1 font-mono text-xs font-black uppercase tracking-wider text-text hover:bg-surface transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bauhaus-blue active:translate-x-[1px] active:translate-y-[1px]"
+          aria-pressed="false"
+          title="Switch to English"
+          aria-label="Switch to English"
+          data-i18n-attr="title:lang.toEn,aria-label:lang.toEn"
+        >
+          EN
+        </button>
+      </div>
+
+      <!-- Bauhaus Constructivist Theme Toggle Button -->
+      <div class="relative flex items-center">
+        <button
+          type="button"
+          id="theme-toggle"
+          class="inline-flex cursor-pointer select-none items-center gap-2 rounded-none border-2 border-border bg-card px-2.5 py-1.5 font-mono text-xs font-black uppercase tracking-wider text-text shadow-[2px_2px_0px_0px_var(--color-border)] hover:bg-bauhaus-yellow hover:text-stark-black active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bauhaus-blue transition-all"
+          title="Alternar modo claro / oscuro"
+          aria-label="Alternar modo claro / oscuro"
+          data-i18n-attr="title:theme.toggle,aria-label:theme.toggle"
+        >
+          <span class="theme-icon-sun" aria-hidden="true">
+            <Sun class="size-4 text-bauhaus-yellow" />
+          </span>
+          <span class="theme-icon-moon" aria-hidden="true">
+            <Moon class="size-4 text-bauhaus-blue" />
+          </span>
+          <span class="hidden md:inline text-[11px] font-black uppercase tracking-wider" data-i18n="theme.label">Tema</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::marker {
+    content: '';
+  }
+</style>
+
+<script is:inline data-theme>
+  (() => {
+    function getIsDark() {
+      return document.documentElement.classList.contains('dark');
+    }
+
+    function applyTheme(isDark) {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+      }
+      updateToggleUI();
+    }
+
+    function updateToggleUI() {
+      const btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      const isDark = getIsDark();
+      btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      btn.setAttribute(
+        'title',
+        isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+      );
+    }
+
+    function toggleTheme() {
+      const nextDark = !getIsDark();
+      try {
+        localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+      } catch (_) {}
+      applyTheme(nextDark);
+    }
+
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target && target.closest && target.closest('#theme-toggle')) {
+        e.preventDefault();
+        toggleTheme();
+      }
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'theme') {
+        const isDark = e.newValue === 'dark';
+        applyTheme(isDark);
+      }
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateToggleUI);
+    } else {
+      updateToggleUI();
+    }
+  })();
+</script>

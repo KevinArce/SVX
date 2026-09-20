@@ -1,0 +1,63 @@
+---
+import { getCollection } from 'astro:content';
+import { Info } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroSection from '../../components/HeroSection.astro';
+import RestaurantCard from '../../components/RestaurantCard.astro';
+import { breadcrumbSchema, restaurantSchema } from '../../lib/schema';
+
+const restaurants = await getCollection('restaurants');
+
+const title = 'Gastronomía del centro';
+const description =
+  'Dónde comer cerca de los monumentos del Centro Histórico: pupuserías, café de especialidad y comedores de almuerzo.';
+
+const breadcrumbs = breadcrumbSchema(
+  [
+    { name: 'Inicio', path: '/' },
+    { name: 'Gastronomía', path: '/gastronomia/' },
+  ],
+  Astro.site,
+);
+
+const restaurantLd = restaurants.map((entry) =>
+  restaurantSchema(entry, Astro.site, entry.data.heroImage.src),
+);
+
+const jsonLd = [...restaurantLd, breadcrumbs];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd} pageTitleKey="gastronomy.title">
+  <HeroSection
+    eyebrow="Dónde comer"
+    eyebrowI18nKey="gastronomy.eyebrow"
+    title={title}
+    titleI18nKey="gastronomy.title"
+    description={description}
+    descriptionI18nKey="gastronomy.description"
+  />
+
+  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+    <!-- Constructivist Alert Box -->
+    <div
+      class="mb-10 flex items-start gap-4 rounded-none border-2 sm:border-4 border-border bg-bauhaus-yellow/20 p-5 text-sm font-medium text-text shadow-[4px_4px_0px_0px_var(--color-border)]"
+    >
+      <Info aria-hidden="true" class="mt-0.5 size-5 shrink-0 text-stark-black dark:text-bauhaus-yellow" />
+      <span class="leading-relaxed" data-i18n="gastronomy.alert">
+        Estas fichas son <strong class="font-black uppercase tracking-wide text-text">referenciales</strong>: describen
+        tipos de establecimiento típicos de la zona, no negocios verificados. Confirmá horarios y
+        ubicación antes de ir.
+      </span>
+    </div>
+
+    <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        restaurants.map((entry, index) => (
+          <li class="h-full">
+            <RestaurantCard entry={entry} eager={index === 0} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

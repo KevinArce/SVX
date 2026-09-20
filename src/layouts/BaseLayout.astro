@@ -1,0 +1,288 @@
+---
+import { Font } from 'astro:assets';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE } from '../lib/site';
+import { TRANSLATIONS } from '../lib/i18n/translations';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  pageTitleKey?: string | undefined;
+  /** Absolute or root-relative path to the social share image. */
+  ogImage?: string | undefined;
+  ogImageAlt?: string | undefined;
+  ogType?: 'website' | 'article';
+  /** One or more JSON-LD objects to embed. */
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>> | undefined;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  pageTitleKey,
+  ogImage,
+  ogImageAlt,
+  ogType = 'website',
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const socialImage = new URL(ogImage ?? '/og-default.png', Astro.site).href;
+// The home page already reads as the brand; inner pages get the suffix.
+const fullTitle = title === SITE.title ? title : `${title} · ${SITE.name}`;
+const structuredData = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#F0F0F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={SITE.author.name} />
+    <meta name="application-name" content={SITE.name} />
+    <meta name="apple-mobile-web-app-title" content={SITE.name} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <!-- Synchronous theme & language bootstrap: defaults to light and ES, honors stored preferences -->
+    <script is:inline data-theme>
+      (() => {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const isDark = storedTheme === 'dark';
+          const root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+            root.classList.remove('light');
+          } else {
+            root.classList.remove('dark');
+            root.classList.add('light');
+          }
+
+          const storedLang = localStorage.getItem('svx_language') || 'es';
+          if (storedLang === 'en') {
+            root.lang = 'en';
+            root.setAttribute('data-current-lang', 'en');
+          } else {
+            root.lang = 'es';
+            root.setAttribute('data-current-lang', 'es');
+          }
+        } catch (_) {}
+      })();
+    </script>
+
+    <!-- Favicon & Web App Icons -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Self-hosted fonts: emits @font-face plus <link rel="preload">. -->
+    <Font cssVariable="--font-body" preload />
+    <Font cssVariable="--font-display" preload />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:secure_url" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={ogImageAlt ?? `${fullTitle} — Guía cultural`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt ?? `${fullTitle} — Guía cultural`} />
+
+    {
+      structuredData.map((entry) => (
+        <script type="application/ld+json" is:inline set:html={JSON.stringify(entry)} />
+      ))
+    }
+  </head>
+
+  <body class="min-h-screen bg-surface text-text antialiased selection:bg-bauhaus-yellow selection:text-stark-black">
+    <a class="skip-link" href="#contenido" data-i18n="skipLink">Saltar al contenido</a>
+    <SiteHeader />
+    <main id="contenido" tabindex="-1" data-page-title-key={pageTitleKey}>
+      <slot />
+    </main>
+    <SiteFooter />
+
+    <!-- Client-side translation engine & data -->
+    <script is:inline data-theme set:html={`
+      window.__SVX_I18N__ = ${JSON.stringify(TRANSLATIONS)};
+      (() => {
+        const translations = window.__SVX_I18N__;
+        if (!translations) return;
+
+        function getDeep(obj, path) {
+          if (!obj || !path) return undefined;
+          const parts = path.split('.');
+          let cur = obj;
+          for (let i = 0; i < parts.length; i++) {
+            if (cur === null || cur === undefined) return undefined;
+            cur = cur[parts[i]];
+          }
+          return cur;
+        }
+
+        function resolveText(lang, key, params) {
+          const lDict = translations[lang] || translations['es'];
+          let val = (lDict.ui && lDict.ui[key] !== undefined)
+            ? lDict.ui[key]
+            : getDeep(lDict, key);
+
+          if (val === undefined || val === null) return null;
+          if (typeof val !== 'string') return val;
+
+          if (params) {
+            for (const [pKey, pVal] of Object.entries(params)) {
+              val = val.replace(new RegExp('\\\\{' + pKey + '\\\\}', 'g'), String(pVal));
+            }
+          }
+          return val;
+        }
+
+        function applyLanguage(lang, persist) {
+          const root = document.documentElement;
+          root.lang = lang;
+          root.setAttribute('data-current-lang', lang);
+
+          if (persist) {
+            try {
+              localStorage.setItem('svx_language', lang);
+            } catch (_) {}
+          }
+
+          // 1. Update Language Switcher buttons UI
+          const buttons = document.querySelectorAll('button[data-lang-btn]');
+          buttons.forEach((btn) => {
+            const btnLang = btn.getAttribute('data-lang-btn');
+            const isActive = btnLang === lang;
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            if (isActive) {
+              btn.classList.add('bg-bauhaus-red', 'text-pure-white');
+              btn.classList.remove('text-text');
+            } else {
+              btn.classList.remove('bg-bauhaus-red', 'text-pure-white');
+              btn.classList.add('text-text');
+            }
+          });
+
+          // 2. Update navigation aria-label
+          const mainNav = document.querySelector('nav[aria-label]');
+          if (mainNav) {
+            mainNav.setAttribute(
+              'aria-label',
+              lang === 'en' ? 'Main navigation' : 'Navegación principal'
+            );
+          }
+
+          // 3. Update textContent for [data-i18n]
+          document.querySelectorAll('[data-i18n]').forEach((el) => {
+            const key = el.getAttribute('data-i18n');
+            if (!key) return;
+            let params = undefined;
+            const rawParams = el.getAttribute('data-i18n-params');
+            if (rawParams) {
+              try { params = JSON.parse(rawParams); } catch (_) {}
+            }
+            const text = resolveText(lang, key, params);
+            if (text !== null && text !== undefined && typeof text === 'string') {
+              el.textContent = text;
+            }
+          });
+
+          // 4. Update innerHTML for [data-i18n-html]
+          document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+            const key = el.getAttribute('data-i18n-html');
+            if (!key) return;
+            const html = resolveText(lang, key);
+            if (html !== null && html !== undefined && typeof html === 'string') {
+              el.innerHTML = html;
+            }
+          });
+
+          // 5. Update attributes for [data-i18n-attr]
+          document.querySelectorAll('[data-i18n-attr]').forEach((el) => {
+            const attrRules = el.getAttribute('data-i18n-attr');
+            if (!attrRules) return;
+            const pairs = attrRules.split(',');
+            pairs.forEach((pair) => {
+              const [attr, key] = pair.split(':').map((s) => s.trim());
+              if (attr && key) {
+                const val = resolveText(lang, key);
+                if (val && typeof val === 'string') el.setAttribute(attr, val);
+              }
+            });
+          });
+
+          // 6. Update document.title if page title key is present
+          const pageTitleEl = document.querySelector('[data-page-title-key]');
+          if (pageTitleEl) {
+            const key = pageTitleEl.getAttribute('data-page-title-key');
+            if (key) {
+              const titleText = resolveText(lang, key);
+              if (titleText && typeof titleText === 'string') {
+                document.title = (key === 'site.title' || titleText.includes('SVX'))
+                  ? titleText
+                  : (titleText + ' · SVX');
+              }
+            }
+          }
+
+          // 7. Dispatch event for interactive island components
+          window.dispatchEvent(new CustomEvent('svx:lang', { detail: { lang } }));
+        }
+
+        // Expose applyLanguage globally
+        window.__SVX_APPLY_LANG__ = applyLanguage;
+
+        // Listen for language switcher clicks
+        document.addEventListener('click', (e) => {
+          const btn = e.target && e.target.closest && e.target.closest('[data-lang-btn]');
+          if (btn) {
+            e.preventDefault();
+            const targetLang = btn.getAttribute('data-lang-btn');
+            if (targetLang === 'es' || targetLang === 'en') {
+              applyLanguage(targetLang, true);
+            }
+          }
+        });
+
+        // Listen for storage changes from other tabs
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'svx_language' && (e.newValue === 'es' || e.newValue === 'en')) {
+            applyLanguage(e.newValue, false);
+          }
+        });
+
+        // Run on initial load
+        const initialLang = localStorage.getItem('svx_language') || 'es';
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => applyLanguage(initialLang, false));
+        } else {
+          applyLanguage(initialLang, false);
+        }
+      })();
+    `} />
+  </body>
+</html>
