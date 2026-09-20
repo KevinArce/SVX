@@ -170,6 +170,8 @@ export const TRANSLATIONS: Record<Language, TranslationDict> = {
       'footer.navTitle': 'Navegación',
       'footer.navAria': 'Enlaces del pie de página',
       'footer.copyright': '© {year} SVX. Creado por {author}. Código abierto bajo licencia MIT.',
+      'footer.aiAgents': 'Agentes & IA (llms.txt)',
+      'footer.openData': 'Datos Abiertos (JSON)',
     },
     monuments: {
       'catedral-metropolitana': {
@@ -486,6 +488,8 @@ export const TRANSLATIONS: Record<Language, TranslationDict> = {
       'footer.navTitle': 'Navigation',
       'footer.navAria': 'Footer navigation links',
       'footer.copyright': '© {year} SVX. Created by {author}. Open source under MIT license.',
+      'footer.aiAgents': 'AI Agents (llms.txt)',
+      'footer.openData': 'Open Data (JSON)',
     },
     monuments: {
       'catedral-metropolitana': {

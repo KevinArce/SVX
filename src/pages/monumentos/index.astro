@@ -52,7 +52,13 @@ const collectionSchema = collectionPageSchema(
 const jsonLd = [collectionSchema, breadcrumbs];
 ---
 
-<BaseLayout title={title} description={description} jsonLd={jsonLd} pageTitleKey="monuments.title">
+<BaseLayout
+  title={title}
+  description={description}
+  jsonLd={jsonLd}
+  pageTitleKey="monuments.title"
+  jsonAlternate="/api/monumentos.json"
+>
   <HeroSection
     eyebrow="Directorio"
     eyebrowI18nKey="monuments.eyebrow"

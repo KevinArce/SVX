@@ -17,6 +17,8 @@ interface Props {
   /** One or more JSON-LD objects to embed. */
   jsonLd?: Record<string, unknown> | Array<Record<string, unknown>> | undefined;
   noindex?: boolean;
+  markdownAlternate?: string | undefined;
+  jsonAlternate?: string | undefined;
 }
 
 const {
@@ -28,6 +30,8 @@ const {
   ogType = 'website',
   jsonLd,
   noindex = false,
+  markdownAlternate,
+  jsonAlternate,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -52,7 +56,13 @@ const structuredData = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
     <meta name="author" content={SITE.author.name} />
     <meta name="application-name" content={SITE.name} />
     <meta name="apple-mobile-web-app-title" content={SITE.name} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, follow" />
+      ) : (
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      )
+    }
 
     <!-- Synchronous theme & language bootstrap: defaults to light and ES, honors stored preferences -->
     <script is:inline data-theme>
@@ -87,6 +97,15 @@ const structuredData = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- AI & Agent discovery endpoints -->
+    <link rel="help" type="text/plain" href="/llms.txt" title="LLM context" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM context summary" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full LLM context" />
+    <link rel="alternate" type="application/json" href="/api/all.json" title="Consolidated Open Data Catalog (JSON)" />
+    <link rel="service-doc" type="application/json" href="/api/openapi.json" title="OpenAPI 3.1 Specification" />
+    {markdownAlternate && <link rel="alternate" type="text/markdown" href={markdownAlternate} title={`${fullTitle} (Markdown)`} />}
+    {jsonAlternate && <link rel="alternate" type="application/json" href={jsonAlternate} title={`${fullTitle} (JSON)`} />}
 
     <!-- Self-hosted fonts: emits @font-face plus <link rel="preload">. -->
     <Font cssVariable="--font-body" preload />

@@ -27,7 +27,13 @@ const restaurantLd = restaurants.map((entry) =>
 const jsonLd = [...restaurantLd, breadcrumbs];
 ---
 
-<BaseLayout title={title} description={description} jsonLd={jsonLd} pageTitleKey="gastronomy.title">
+<BaseLayout
+  title={title}
+  description={description}
+  jsonLd={jsonLd}
+  pageTitleKey="gastronomy.title"
+  jsonAlternate="/api/gastronomia.json"
+>
   <HeroSection
     eyebrow="Dónde comer"
     eyebrowI18nKey="gastronomy.eyebrow"

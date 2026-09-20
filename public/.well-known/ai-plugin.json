@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "svx_san_salvador_cultural_guide",
+  "name_for_human": "SVX — Centro Histórico de San Salvador",
+  "description_for_model": "Guía cultural, arquitectónica y turística del Centro Histórico de San Salvador. Permite consultar fichas detalladas de monumentos patrimoniales, rutas peatonales con tiempos estimados y paradas, y recomendaciones de gastronomía local típica cercana.",
+  "description_for_human": "Guía arquitectónica y rutas a pie del Centro Histórico de San Salvador.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://svx.kevinarce.workers.dev/api/openapi.json"
+  },
+  "logo_url": "https://svx.kevinarce.workers.dev/favicon.svg",
+  "contact_email": "kevin@arcelabs.com",
+  "legal_info_url": "https://svx.kevinarce.workers.dev/"
+}

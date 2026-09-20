@@ -126,6 +126,27 @@ export function websiteSchema(site: URL | undefined): JsonLd {
       url: SITE.author.url,
       sameAs: [SITE.author.github, SITE.author.buymeacoffee],
     },
+    hasPart: [
+      {
+        '@type': 'Dataset',
+        name: 'SVX Open Cultural & Architectural Data',
+        description:
+          'Catálogo estructurado y abierto de monumentos, rutas peatonales y gastronomía del Centro Histórico de San Salvador para agentes de IA y aplicaciones culturales.',
+        url: absolute('/api/all.json', site),
+        distribution: [
+          {
+            '@type': 'DataDownload',
+            encodingFormat: 'application/json',
+            contentUrl: absolute('/api/all.json', site),
+          },
+          {
+            '@type': 'DataDownload',
+            encodingFormat: 'text/plain',
+            contentUrl: absolute('/llms-full.txt', site),
+          },
+        ],
+      },
+    ],
   };
 }
 
